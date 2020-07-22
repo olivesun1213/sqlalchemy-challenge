@@ -43,7 +43,6 @@ def welcome():
         f"/api/v1.0/&lt;start&gt;/&lt;end&gt;"
     )
 
-
 @app.route("/api/v1.0/precipitation")
 
 #Convert the query results to a dictionary using date as the key and prcp as the value.
@@ -109,7 +108,76 @@ def tobs():
 
     return jsonify(tobs_list)
 
+@app.route("/api/v1.0/<start>")
+def calc_temp(start):
+    """TMIN, TAVG, and TMAX per date starting from a starting date.
+    
+    Args:
+        start (string): A date string in the format %Y-%m-%d
+        
+    Returns:
+        TMIN, TAVE, and TMAX
+    """
 
+    # Create our session (link) from Python to the DB
+    session = Session(engine)
+
+    result_list = []
+
+    results =   session.query(  Measurement.date,\
+                                func.min(Measurement.tobs), \
+                                func.avg(Measurement.tobs), \
+                                func.max(Measurement.tobs)).\
+                        filter(Measurement.date >= start).\
+                        group_by(Measurement.date).all()
+
+    for date, min, avg, max in results:
+        temp_range = {}
+        new_dict["Date"] = date
+        new_dict["TMIN"] = min
+        new_dict["TAVG"] = avg
+        new_dict["TMAX"] = max
+        return_list.append(temp_range)
+
+    session.close()    
+
+    return jsonify(result_list)
+
+@app.route("/api/v1.0/<start>/<end>")
+def calc_temp(start,end):
+    """TMIN, TAVG, and TMAX per date starting from a starting date.
+    
+    Args:
+        start (string): A date string in the format %Y-%m-%d
+        end_date (string): A date string in the format %Y-%m-%d
+
+    Returns:
+        TMIN, TAVE, and TMAX
+    """
+
+    # Create our session (link) from Python to the DB
+    session = Session(engine)
+
+    result_list = []
+
+    results =   session.query(  Measurement.date,\
+                                func.min(Measurement.tobs), \
+                                func.avg(Measurement.tobs), \
+                                func.max(Measurement.tobs)).\
+                        filter(Measurement.date >= start).filter(Measurement.date <= end_date).\
+                        group_by(Measurement.date).all()
+
+    for date, min, avg, max in results:
+        temp_range = {}
+        new_dict["Date"] = date
+        new_dict["TMIN"] = min
+        new_dict["TAVG"] = avg
+        new_dict["TMAX"] = max
+        return_list.append(temp_range)
+
+    session.close()    
+
+    return jsonify(result_list)
 
 
 if __name__ == '__main__':
