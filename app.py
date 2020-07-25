@@ -110,16 +110,12 @@ def tobs():
 
 @app.route("/api/v1.0/<start>")
 def calc_temp(start):
-    """TMIN, TAVG, and TMAX per date starting from a starting date.
-    
+    """TMIN, TAVG, and TMAX per date starting from a starting date.    
     Args:
-        start (string): A date string in the format %Y-%m-%d
-        
+        start (string): A date string in the format %Y-%m-%d     
     Returns:
         TMIN, TAVE, and TMAX
     """
-
-    # Create our session (link) from Python to the DB
     session = Session(engine)
 
     result_list = []
@@ -128,15 +124,15 @@ def calc_temp(start):
                                 func.min(Measurement.tobs), \
                                 func.avg(Measurement.tobs), \
                                 func.max(Measurement.tobs)).\
-                        filter(Measurement.date >= start).\
-                        group_by(Measurement.date).all()
+                        filter(Measurement.date >= start).all()
+                       
 
     for date, min, avg, max in results:
         temp_range = {}
-        new_dict["Date"] = date
-        new_dict["TMIN"] = min
-        new_dict["TAVG"] = avg
-        new_dict["TMAX"] = max
+        temp_range["Date"] = date
+        temp_range["TMIN"] = min
+        temp_range["TAVG"] = avg
+        temp_range["TMAX"] = max
         return_list.append(temp_range)
 
     session.close()    
@@ -164,15 +160,15 @@ def calc_temp(start,end):
                                 func.min(Measurement.tobs), \
                                 func.avg(Measurement.tobs), \
                                 func.max(Measurement.tobs)).\
-                        filter(Measurement.date >= start).filter(Measurement.date <= end_date).\
-                        group_by(Measurement.date).all()
+                        filter(Measurement.date >= start).filter(Measurement.date <= end_date).all()
+                    
 
     for date, min, avg, max in results:
         temp_range = {}
-        new_dict["Date"] = date
-        new_dict["TMIN"] = min
-        new_dict["TAVG"] = avg
-        new_dict["TMAX"] = max
+        temp_range["Date"] = date
+        temp_range["TMIN"] = min
+        temp_range["TAVG"] = avg
+        temp_range["TMAX"] = max
         return_list.append(temp_range)
 
     session.close()    
